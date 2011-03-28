@@ -1,8 +1,9 @@
 #!/bin/env python
 #-*- encoding: utf-8 -*-
 
-# GUI front end for qrencode based on the work
-# of David Green <david4dev@gmail.com> and inspired by
+# GUI front end for qrencode based on the work of David Green:
+# <david4dev@gmail.com> https://launchpad.net/qr-code-creator/
+# and inspired by
 # http://www.omgubuntu.co.uk/2011/03/how-to-create-qr-codes-in-ubuntu/
 #
 # This is FREE SOFTWARE: GNU GPLv3
