@@ -2,13 +2,14 @@
 #-*- encoding: utf-8 -*-
 
 # GUI front end for qrencode based on the work
-# of David Green <david4dev@gmail.com>
+# of David Green <david4dev@gmail.com> and inspired by
+# http://www.omgubuntu.co.uk/2011/03/how-to-create-qr-codes-in-ubuntu/
 #
 # This is FREE SOFTWARE: GNU GPLv3
 #
 # copyright (C) 2011 Ramiro Algozino <algozino@gmail.com>
 
-import sys, os
+import sys, os, subprocess
 from PyQt4 import QtCore, QtGui
 
 class MainWindow(QtGui.QMainWindow): 
@@ -61,15 +62,18 @@ class MainWindow(QtGui.QMainWindow):
         if text:
             code = '/tmp/qr.png'
             print u"Encoding to %s.." % code
-            os.system( 'qrencode -o %s -s %s %s' % (code, self.pixelSize.value(), text) )
-            if os.path.isfile(code):
-                self.qrcode.setPixmap(QtGui.QPixmap(code))
-                self.saveButton.setEnabled(True)
+            try:
+                retcode = subprocess.call([u'qrencode', u'-o', code, u'-s', unicode(self.pixelSize.value()), text])
+                if retcode == 0 and os.path.isfile(code):
+                    self.qrcode.setPixmap(QtGui.QPixmap(code))
+                    self.saveButton.setEnabled(True)
+            except:
+                print >>sys.stderr, u"ERROR: Something went wrong while trying to generate de qrcode."
         else:
             self.saveButton.setEnabled(False)
                 
     def saveCode(self):
-        fn = QtGui.QFileDialog.getSaveFileName(self, u'Save QRCode')
+        fn = QtGui.QFileDialog.getSaveFileName(self, u'Save QRCode', filter=u'PNG Images (*.png);; All Files (*.*)')
         if fn:
             self.qrcode.pixmap().save(fn)
             print "Saving to file: %s" % fn
