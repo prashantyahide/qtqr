@@ -265,7 +265,7 @@ class MainWindow(QtGui.QMainWindow):
                 link = 'mailto:%s?subject=%s&body=%s' % qr.data_decode[qr.data_type](qr.data) 
             else:
                 link = qr.data_decode[qr.data_type](qr.data_type)
-            print u"Opening " + link + "..."
+            print u"Opening " + link
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(link))
         
 
