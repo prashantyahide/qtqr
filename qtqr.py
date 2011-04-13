@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
 # GUI front end for qrencode based on the work of David Green:
@@ -10,7 +10,7 @@
 #
 # copyright (C) 2011 Ramiro Algozino <algozino@gmail.com>
 
-import sys
+import sys, os
 from PyQt4 import QtCore, QtGui
 from qrtools import QR
 
@@ -19,7 +19,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
 
         self.setWindowTitle(u'QtQR: QR Code Generator')
-        self.setWindowIcon(QtGui.QIcon(u'icon.png'))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), u'icon.png')))
         self.w = QtGui.QWidget()
         self.setCentralWidget(self.w)
 
@@ -75,8 +75,8 @@ class MainWindow(QtGui.QMainWindow):
         self.decodeButton = QtGui.QPushButton(QtGui.QIcon.fromTheme(u'preview-file'),u'&Decode')
         
         self.decodeMenu = QtGui.QMenu()
-        self.decodeFileAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'document-open'), u'Decode from File')
-        self.decodeWebcamAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'image-png'), u'Decode from WebCam')
+        self.decodeFileAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'document-open'), u'Decode from &File')
+        self.decodeWebcamAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'image-png'), u'Decode from &WebCam')
         self.decodeButton.setMenu(self.decodeMenu)
 
         self.textEdit.setMaximumHeight(self.textEdit.height()/3.5)        
@@ -90,6 +90,9 @@ class MainWindow(QtGui.QMainWindow):
         self.l3.setBuddy(self.ecLevel)
         self.l4.setBuddy(self.marginSize)
         self.ecLevel.setToolTip(u'Error Correction Level')
+        self.l3.setToolTip(u'Error Correction Level')
+        self.decodeFileAction.setShortcut(u"Ctrl+O")
+        self.decodeWebcamAction.setShortcut(u"Ctrl+W")
         self.exitButton.setShortcut(u"Ctrl+Q")
         self.saveButton.setShortcut(u"Ctrl+S")
 
@@ -197,7 +200,7 @@ class MainWindow(QtGui.QMainWindow):
             unicode(self.telephoneEdit.text()),
         ]
         level = (u'L',u'M',u'Q',u'H')
-        data_type = (u'text',u'url',u'email',u'sms',u'telephone')
+        data_type = (u'text',u'url',u'emailmessage',u'sms',u'telephone')
 
         if text[self.tabs.currentIndex()]:
             qr = QR(pixel_size = unicode(self.pixelSize.value()),
@@ -225,17 +228,29 @@ class MainWindow(QtGui.QMainWindow):
         
     def decodeFile(self):
         fn = unicode(QtGui.QFileDialog.getOpenFileName(self, u'Open QRCode', filter=u'PNG Images (*.png);; All Files (*.*)'))
-
         if fn:
             qr = QR(filename=fn)
             if qr.decode():
-                QtGui.QMessageBox.information(self, u'Decode QRCode', qr.data_to_string())
+                self.showInfo(qr)
+
+    def showInfo(self, qr):
+        msg = {
+            'text': lambda : unicode(qr.data_decode[qr.data_type](qr.data)),
+            'url': lambda : unicode(qr.data_decode[qr.data_type](qr.data)),
+            'email': lambda : u"QRCode contains an e-mail addres.\n%s" % unicode((qr.data_decode[qr.data_type](qr.data))),
+            'emailmessage': lambda : u"QRCode contains an e-mail message.\nTo: %s\nSubject: %s\nMessage: %s" % qr.data_decode[qr.data_type](qr.data),
+            'telephone': lambda : u"QRCode contains a telephone number: " + unicode(qr.data_decode[qr.data_type](qr.data)),
+            'sms': lambda : u"QRCode contains an SMS message.\nTo: %s\nMessage: %s" % qr.data_decode[qr.data_type](qr.data),
+        }
+        #FIX-ME: Promt to do the related action to the data type
+        QtGui.QMessageBox.information(self, u'Decode QRCode', msg[qr.data_type]())
+        print qr.data_type + ':', qr.data_decode[qr.data_type](qr.data)
 
     def decodeWebcam(self):
         qr = QR()
         qr.decode_webcam()
         if qr.data_to_string() != 'NULL':
-            QtGui.QMessageBox.information(self, u'Decode QRCode', qr.data_to_string())
+            self.showInfo(qr)
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
