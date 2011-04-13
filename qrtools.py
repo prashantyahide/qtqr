@@ -32,18 +32,18 @@ class QR(object):
 
     #use these for custom data formats eg. url, phone number, VCARD
     data_encode = {
-        'text' : lambda data: str(data),
+        'text' : lambda data: unicode(data),
         'url' : lambda data: 'http://' + re.compile(
                 r'^http://', re.IGNORECASE
-            ).sub('', str(data)),
+            ).sub('', unicode(data)),
         'email' :lambda data: 'mailto:' + re.compile(
                 r'^mailto:', re.IGNORECASE
-            ).sub('', str(data)),
-        'emailmessage' : lambda data : 'MATMSG:TO:' + str(data[0]) + ';SUB:' + str(data[1]) + ';BODY:' + str(data[2]) + ';;',
+            ).sub('', unicode(data)),
+        'emailmessage' : lambda data : 'MATMSG:TO:' + unicode(data[0]) + ';SUB:' + unicode(data[1]) + ';BODY:' + unicode(data[2]) + ';;',
         'telephone' : lambda data: 'tel:' + re.compile(
                 r'^tel:', re.IGNORECASE
-            ).sub('', str(data)),
-        'sms' : lambda data : 'SMSTO:' + str(data[0]) + ':' + str(data[1]),
+            ).sub('', unicode(data)),
+        'sms' : lambda data : 'SMSTO:' + unicode(data[0]) + ':' + unicode(data[1]),
     }
 
     data_decode = {
@@ -87,7 +87,7 @@ class QR(object):
         return os.path.join(
             self.directory,
             #filename is hash of data
-            hashlib.sha256(self.data_to_string()).hexdigest() + '.png'
+            hashlib.sha256(self.data_to_string().encode('utf-8')).hexdigest() + '.png'
         )
 
     def encode(self, filename=None):
@@ -97,8 +97,8 @@ class QR(object):
         return subprocess.Popen([
             'qrencode',
             '-o', self.filename,
-            '-s', str(self.pixel_size),
-            '-m', str(self.margin_size),
+            '-s', unicode(self.pixel_size),
+            '-m', unicode(self.margin_size),
             '-l', self.level,
             self.data_to_string()
         ]).wait()
