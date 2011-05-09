@@ -14,7 +14,7 @@ import sys, os
 from PyQt4 import QtCore, QtGui
 from qrtools import QR
 
-class MainWindow(QtGui.QMainWindow): 
+class MainWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
 
@@ -35,25 +35,27 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.addTab(self.emailTab, u"&Email")
         self.tabs.addTab(self.smsTab, u"S&MS")
         self.tabs.addTab(self.telTab, u"&Telephone")
-        
+
         self.l1 = QtGui.QLabel(u'Text to be encoded:')
         self.textEdit = QtGui.QPlainTextEdit()
 
         self.urlLabel =  QtGui.QLabel(u'URL to be encoded:')
         self.urlEdit = QtGui.QLineEdit(u'http://')
-        
+
         self.emailLabel = QtGui.QLabel(u'E-Mail address:')
         self.emailEdit = QtGui.QLineEdit(u"@.com")
         self.emailSubLabel = QtGui.QLabel(u'Subject:')
         self.emailSubjectEdit = QtGui.QLineEdit()
         self.emailBodyLabel = QtGui.QLabel(u'Message Body:')
-        self.emailBodyEdit = QtGui.QLineEdit()
+        self.emailBodyEdit = QtGui.QPlainTextEdit()
+
         self.telephoneLabel = QtGui.QLabel(u'Telephone Number:')
         self.telephoneEdit = QtGui.QLineEdit()
+
         self.smsNumberLabel = QtGui.QLabel(u'Telephone Number:')
-        self.smsNumberEdit = QtGui.QLineEdit() 
+        self.smsNumberEdit = QtGui.QLineEdit()
         self.smsBodyLabel = QtGui.QLabel(u'Message:')
-        self.smsBodyEdit = QtGui.QLineEdit()
+        self.smsBodyEdit = QtGui.QPlainTextEdit()
 
         self.optionsGroup = QtGui.QGroupBox(u'Parameters:')
 
@@ -62,25 +64,28 @@ class MainWindow(QtGui.QMainWindow):
 
         self.l3 = QtGui.QLabel(u'&EC Level:')
         self.ecLevel = QtGui.QComboBox() #LMQH
-        self.ecLevel.addItems((u'Lowest',u'Medium',u'Q',u'Highest'))
+        self.ecLevel.addItems((u'Lowest', u'Medium', u'Q', u'Highest'))
 
         self.l4 = QtGui.QLabel(u'&Margin Size:')
         self.marginSize = QtGui.QSpinBox()
 
-        self.qrcode = QtGui.QLabel(u'\n\nStart typing to create QRcode.\n\n')
-        self.qrcode.setAlignment(QtCore.Qt.AlignHCenter)
+        self.qrcode = QtGui.QLabel(u'Start typing to create QR Code.')
+        self.qrcode.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.qrcode.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
 
         self.saveButton = QtGui.QPushButton(QtGui.QIcon.fromTheme(u'document-save'), u'&Save QRCode')
-        self.exitButton = QtGui.QPushButton(QtGui.QIcon.fromTheme(u'application-exit'),u'E&xit')
-        self.decodeButton = QtGui.QPushButton(QtGui.QIcon.fromTheme(u'preview-file'),u'&Decode')
-        
+        self.decodeButton = QtGui.QPushButton(QtGui.QIcon.fromTheme(u'preview-file'), u'&Decode')
+
         self.decodeMenu = QtGui.QMenu()
         self.decodeFileAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'document-open'), u'Decode from &File')
         self.decodeWebcamAction = self.decodeMenu.addAction(QtGui.QIcon.fromTheme(u'image-png'), u'Decode from &WebCam')
         self.decodeButton.setMenu(self.decodeMenu)
 
-        self.textEdit.setMaximumHeight(self.textEdit.height()/3.5)        
-        self.qrcode.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.exitAction = QtGui.QAction(QtGui.QIcon.fromTheme(u'application-exit'), u'E&xit', self)
+        self.addAction(self.exitAction)
+        self.aboutAction = QtGui.QAction(QtGui.QIcon.fromTheme(u"help-about"), u"&About", self)
+        self.addAction(self.aboutAction)
+
         self.saveButton.setEnabled(False)
         self.pixelSize.setValue(3)
         self.pixelSize.setMinimum(1)
@@ -93,27 +98,27 @@ class MainWindow(QtGui.QMainWindow):
         self.l3.setToolTip(u'Error Correction Level')
         self.decodeFileAction.setShortcut(u"Ctrl+O")
         self.decodeWebcamAction.setShortcut(u"Ctrl+W")
-        self.exitButton.setShortcut(u"Ctrl+Q")
         self.saveButton.setShortcut(u"Ctrl+S")
+        self.exitAction.setShortcut(u"Ctrl+Q")
+        self.aboutAction.setShortcut(u"F1")
 
         self.buttons = QtGui.QHBoxLayout()
         self.buttons.addWidget(self.saveButton)
         self.buttons.addWidget(self.decodeButton)
-        
+
         #Text Tab
         self.codeControls = QtGui.QVBoxLayout()
         self.codeControls.addWidget(self.l1)
-        self.codeControls.addWidget(self.textEdit)
-        self.codeControls.addStretch()
+        self.codeControls.addWidget(self.textEdit, 1)
         self.textTab.setLayout(self.codeControls)
-        
+
         #URL Tab
         self.urlTabLayout = QtGui.QVBoxLayout()
         self.urlTabLayout.addWidget(self.urlLabel)
         self.urlTabLayout.addWidget(self.urlEdit)
         self.urlTabLayout.addStretch()
         self.urlTab.setLayout(self.urlTabLayout)
-        
+
         #Email Tab
         self.emailTabLayout = QtGui.QVBoxLayout()
         self.emailTabLayout.addWidget(self.emailLabel)
@@ -121,41 +126,41 @@ class MainWindow(QtGui.QMainWindow):
         self.emailTabLayout.addWidget(self.emailSubLabel)
         self.emailTabLayout.addWidget(self.emailSubjectEdit)
         self.emailTabLayout.addWidget(self.emailBodyLabel)
-        self.emailTabLayout.addWidget(self.emailBodyEdit)
+        self.emailTabLayout.addWidget(self.emailBodyEdit, 1)
         self.emailTabLayout.addStretch()
         self.emailTab.setLayout(self.emailTabLayout)
-        
+
         #SMS Tab
         self.smsTabLayout = QtGui.QVBoxLayout()
         self.smsTabLayout.addWidget(self.smsNumberLabel)
         self.smsTabLayout.addWidget(self.smsNumberEdit)
         self.smsTabLayout.addWidget(self.smsBodyLabel)
-        self.smsTabLayout.addWidget(self.smsBodyEdit)
+        self.smsTabLayout.addWidget(self.smsBodyEdit, 1)
         self.smsTabLayout.addStretch()
         self.smsTab.setLayout(self.smsTabLayout)
-        
+
         #Telephone Tab
         self.telTabLayout = QtGui.QVBoxLayout()
         self.telTabLayout.addWidget(self.telephoneLabel)
         self.telTabLayout.addWidget(self.telephoneEdit)
         self.telTabLayout.addStretch()
         self.telTab.setLayout(self.telTabLayout)
-        
+
         #Pixel Size Controls
         self.pixControls = QtGui.QVBoxLayout()
         self.pixControls.addWidget(self.l2)
         self.pixControls.addWidget(self.pixelSize)
-        
+
         #Error Correction Level Controls
         self.levelControls = QtGui.QVBoxLayout()
         self.levelControls.addWidget(self.l3)
         self.levelControls.addWidget(self.ecLevel)
-        
+
         #Margin Size Controls
         self.marginControls = QtGui.QVBoxLayout()
         self.marginControls.addWidget(self.l4)
         self.marginControls.addWidget(self.marginSize)
-        
+
         #Controls Layout
         self.controls = QtGui.QHBoxLayout()
         self.controls.addLayout(self.pixControls)
@@ -165,14 +170,15 @@ class MainWindow(QtGui.QMainWindow):
         self.controls.addLayout(self.marginControls)
         self.controls.addStretch()
         self.optionsGroup.setLayout(self.controls)
-        
+
         #Main Window Layout
-        self.layout = QtGui.QVBoxLayout(self.w)
+        self.vlayout = QtGui.QVBoxLayout()
+        self.vlayout.addWidget(self.optionsGroup)
+        self.vlayout.addWidget(self.qrcode, 1)
+        self.vlayout.addLayout(self.buttons)
+        self.layout = QtGui.QHBoxLayout(self.w)
         self.layout.addWidget(self.tabs)
-        self.layout.addWidget(self.optionsGroup)
-        self.layout.addWidget(self.qrcode, 1)
-        self.layout.addLayout(self.buttons)
-        self.layout.addWidget(self.exitButton)
+        self.layout.addLayout(self.vlayout)
 
         #Signals
         self.textEdit.textChanged.connect(self.qrencode)
@@ -182,21 +188,22 @@ class MainWindow(QtGui.QMainWindow):
         self.emailBodyEdit.textChanged.connect(self.qrencode)
         self.smsNumberEdit.textChanged.connect(self.qrencode)
         self.smsBodyEdit.textChanged.connect(self.qrencode)
-        self.telephoneEdit.textChanged.connect(self.qrencode)       
+        self.telephoneEdit.textChanged.connect(self.qrencode)
         self.pixelSize.valueChanged.connect(self.qrencode)
         self.ecLevel.currentIndexChanged.connect(self.qrencode)
         self.marginSize.valueChanged.connect(self.qrencode)
         self.saveButton.clicked.connect(self.saveCode)
-        self.exitButton.clicked.connect(self.close)
+        self.exitAction.triggered.connect(self.close)
+        self.aboutAction.triggered.connect(self.about)
         self.decodeFileAction.triggered.connect(self.decodeFile)
         self.decodeWebcamAction.triggered.connect(self.decodeWebcam)
-
+        
     def qrencode(self):
         text = [
             unicode(self.textEdit.toPlainText()),
             unicode(self.urlEdit.text()),
-            ( unicode(self.emailEdit.text()), unicode(self.emailSubjectEdit.text()), unicode(self.emailBodyEdit.text()) ),
-            ( unicode(self.smsNumberEdit.text()), unicode(self.smsBodyEdit.text()) ),
+            ( unicode(self.emailEdit.text()), unicode(self.emailSubjectEdit.text()), unicode(self.emailBodyEdit.toPlainText()) ),
+            ( unicode(self.smsNumberEdit.text()), unicode(self.smsBodyEdit.toPlainText()) ),
             unicode(self.telephoneEdit.text()),
         ]
         level = (u'L',u'M',u'Q',u'H')
@@ -216,7 +223,7 @@ class MainWindow(QtGui.QMainWindow):
                 print >>sys.stderr, u"ERROR: Something went wrong while trying to generate de qrcode."
         else:
             self.saveButton.setEnabled(False)
-                
+
     def saveCode(self):
         fn = QtGui.QFileDialog.getSaveFileName(self, u'Save QRCode', filter=u'PNG Images (*.png);; All Files (*.*)')
         if fn:
@@ -225,7 +232,7 @@ class MainWindow(QtGui.QMainWindow):
             self.qrcode.pixmap().save(fn)
             print "Saving to file: %s" % fn
             QtGui.QMessageBox.information(self, u'Save QRCode',u'QRCode succesfully saved to <b>%s</b>.' % fn)
-        
+
     def decodeFile(self):
         fn = unicode(QtGui.QFileDialog.getOpenFileName(self, u'Open QRCode', filter=u'Images (*.png *.jpg);; All Files (*.*)'))
         if fn:
@@ -237,7 +244,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def showInfo(self, qr):
         dt = qr.data_type
-        print dt.encode(u"utf-8") + ':', 
+        print dt.encode(u"utf-8") + ':',
         data = qr.data_decode[dt](qr.data)
         if type(data) == tuple:
             for d in data:
@@ -261,41 +268,102 @@ class MainWindow(QtGui.QMainWindow):
             'telephone': u"",
             'sms': u"",
         }
-        if action[qr.data_type] != u"": 
-            rsp = QtGui.QMessageBox.question(
-                self,
+        if action[qr.data_type] != u"":
+            msgBox = QtGui.QMessageBox(
+                QtGui.QMessageBox.Question,
                 u'Decode QRCode',
                 msg[qr.data_type]() + action[qr.data_type],
-                QtGui.QMessageBox.No,
-                QtGui.QMessageBox.Yes
-            )
+                QtGui.QMessageBox.No |
+                QtGui.QMessageBox.Yes,
+                self
+                )
+            msgBox.addButton(u"&Edit", QtGui.QMessageBox.ApplyRole)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Yes)
+            rsp = msgBox.exec_()
         else:
-            rsp = QtGui.QMessageBox.question(
-                self,
-                u'Decode QRCode',
+            msgBox = QtGui.QMessageBox(
+                QtGui.QMessageBox.Information,
+                u"Decode QRCode",
                 msg[qr.data_type]() + action[qr.data_type],
-                QtGui.QMessageBox.Ok
-            )
-            
-        
+                QtGui.QMessageBox.Ok,
+                self
+                )
+            msgBox.addButton(u"&Edit", QtGui.QMessageBox.ApplyRole)
+            msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
+            rsp = msgBox.exec_()
+
         if rsp == QtGui.QMessageBox.Yes:
+            #Open Link
             if qr.data_type == 'emailmessage':
-                link = 'mailto:%s?subject=%s&body=%s' % (data) 
+                link = 'mailto:%s?subject=%s&body=%s' % (data)
             else:
                 link = qr.data_decode[qr.data_type](qr.data)
             print u"Opening " + link
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(link))
-        
+        elif rsp == 0:
+            #Edit the code
+            data = qr.data_decode[qr.data_type](qr.data)
+            if qr.data_type == 'text':
+                self.tabs.setCurrentIndex(0)
+                self.textEdit.setPlainText(data)
+            elif qr.data_type == 'url':
+                self.tabs.setCurrentIndex(1)
+                self.urlEdit.setText(data)
+            elif qr.data_type == 'emailmessage':
+                self.emailEdit.setText(data[0])
+                self.emailSubjectEdit.setText(data[1])
+                self.emailBodyEdit.setPlainText(data[2])
+                self.tabs.setCurrentIndex(2)
+            elif qr.data_type == 'email':
+                self.emailEdit.setText(data)
+                self.emailSubjectEdit.setText("")
+                self.emailBodyEdit.setPlainText("")
+                self.tabs.setCurrentIndex(2)
+            elif qr.data_type == 'sms':
+                self.smsNumberEdit.setText(data[0])
+                self.smsBodyEdit.setPlainText(data[1])
+                self.tabs.setCurrentIndex(3)
+            elif qr.data_type == 'telephone':
+                self.telephoneEdit.setText(data)
+                self.tabs.setCurrentIndex(4)
 
     def decodeWebcam(self):
+        QtGui.QMessageBox.information(
+            self,
+            u"Decode from webcam",
+            u"You are about to decode from your webcam. Please put the code in front of your webcam with a good light source and keep it steady. Once you see a green rectangle you can close the window by pressing any key.",
+            QtGui.QMessageBox.Ok
+        )
         qr = QR()
         qr.decode_webcam()
-        if qr.data_to_string() != 'NULL':
+        if qr.data_decode[qr.data_type](qr.data) == 'NULL':
+            QtGui.QMessageBox.warning(
+                self,
+                u"Decoding Failed",
+                u"<p>Oops! no code was found.<br /> \
+                Maybe your webcam didn't focus.</p>",
+                QtGui.QMessageBox.Ok
+            )
+        else:
             self.showInfo(qr)
+
+    def about(self):
+        QtGui.QMessageBox.about(
+            self,
+            u"About QtQR",
+            u'<h1>QtQR %s</h1>\
+            <p>A simple software for creating and decoding QR Codes.</p>\
+            <p>This is Free Software: GNU-GPLv3</p> \
+            <p><a href="https://launchpad.net/~qr-tools-developers/qtqr">\
+            https://launchpad.net/~qr-tools-developers/qtqr</p> \
+            <p>copyright &copy; Ramiro Algozino \
+            &lt;<a href="mailto:algozino@gmail.com">algozino@gmail.com</a>&gt;</p>' % 1.0, 
+        )
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     mw = MainWindow()
     mw.show()
-    
+
     sys.exit(app.exec_())
